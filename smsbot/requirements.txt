@@ -1,0 +1,7 @@
+sqlalchemy==1.1.9
+
+# We should move to mysqlclient later on as it is highly performant
+pymysql==0.7.11
+
+requests==2.14.2
+pytz==2017.2
