@@ -1,17 +1,25 @@
 # Set up
 `npm install`
-Install ngrok http://ngrok.com/
+Install ngrok https://ngrok.com/
+
 Make a .env file with content like so:
 ```
 PAGE_ACCESS_TOKEN=<Facebook_page_token>
 ```
-run use ``npm start``
+
+start server: 
+
+``npm start``
+
+start a tunnel to our localhost to use with facebook webhook:
+
 `ngrok http 1337`
 
 notes:
 running npm start will start nodemon, which will watch and restart changes to 
 index.js so you don't need to refresh the server everytime. 
-port number is 1337
+Port number is 1337
+
 TODO: set up nodemon to watch for all js file changes
 
 ## Facebook setup
