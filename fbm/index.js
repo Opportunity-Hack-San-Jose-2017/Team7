@@ -83,18 +83,88 @@ app.get('/webhook', (req, res) => {
   }
 });
 
+var states = {};
+
 // Handles messages events
 function handleMessage(sender_psid, received_message) {
   let response;
+  console.log("received_message = ");
+  console.log(received_message);
 
   // Check if the message contains text
-  if (received_message.text) {    
+  //if (received_message.text) {
+      if (states[sender_psid]) {
+          console.log("detected repeat user");
+          states[sender_psid]++;
+      } else {
+          console.log("detected new user");
+          states[sender_psid] = 1;
+      }
+      if (received_message.attachments && received_message.attachments[0].type == "location") {
+          console.log("detected location:" + received_message.attachments[0].payload);
+      }
+      
+      if (states[sender_psid] == 1) {
+        response =  {
+          "text": "Are you in immediate danger?",
+          "quick_replies": [
+            {
+              "content_type": "text",
+              "title": "Yes",
+              "payload": "reply1"
+            },
+            {
+              "content_type": "text",
+              "title": "No",
+              "payload": "reply2"
+            }
+          ]
+        };
+          
+      } else if (states[sender_psid] == 2) {
+        response =  {
+            "text": "What is your location?",
+            "quick_replies": [
+            {
+                "content_type":"location",
+                "title": "location",
+                "payload": "reply3"
+            }
+        ]
 
-    // Create the payload for a basic text message
-    response = {
-      "text": `You sent the message: "${received_message.text}". Now send me an image!`
-    }
-  }  
+        };
+      } else if (states[sender_psid] == 3) {
+          response =  {
+              "text": "Select a category",
+              "quick_replies": [
+                {
+                  "content_type": "text",
+                  "title": "Violence",
+                  "payload": "reply1"
+                },
+                {
+                  "content_type": "text",
+                  "title": "Harassment",
+                  "payload": "reply2"
+                },
+                {
+                  "content_type": "text",
+                  "title": "Danger",
+                  "payload": "reply3"
+                },
+                {
+                  "content_type": "text",
+                  "title": "Other",
+                  "payload": "reply4"
+                }
+              ]
+            };
+          
+      } else if (states[sender_psid] == 4) {
+        response =  {
+            "text": "all done!"
+        }  
+      }
   
   // Sends the response message
   callSendAPI(sender_psid, response); 
@@ -112,9 +182,9 @@ function callSendAPI(sender_psid, response) {
     "recipient": {
       "id": sender_psid
     },
-    "message": response
+      "message": response
   }
-
+  
   // Send the HTTP request to the Messenger Platform
   request({
     "uri": "https://graph.facebook.com/v2.6/me/messages",
@@ -129,3 +199,18 @@ function callSendAPI(sender_psid, response) {
     }
   });
 }
+
+
+
+/*
+sample received message for location:
+
+received_message =
+{ mid: 'mid.$cAAUyL2qdT7Blm079vlfagm1JINrc',
+  seq: 122,
+  attachments:
+   [ { title: 'Kenny\'s Location',
+       url: 'https://l.facebook.com/l.php?u=https%3A%2F%2Fwww.bing.com%2Fmaps%2Fdefault.aspx%3Fv%3D2%26pc%3DFACEBK%26mid%3D8100%26where1%3D37.3768458%252C%2B-121.9216105%26FORM%3DFBKPL1%26mkt%3Den-US&h=ATMOehDAvTA2uQXlInEg4gtMiXfP45kHp93oxyI5U4g0-NTWrHw_lG8uA0enti5ZycdO_5nGWg81ihlZNE7et7xOc-8T3EDJpA4OKejNc3fJANcyqw&s=1&enc=AZPjQPABJ8VVg6Yq3qO1pnV3yWV7_1kjoJm-AMpUuKoMmusinoqbVbdNEQ6e0MjAZNd3ppN-RTawq54zHALQLRBC',
+       type: 'location',
+       payload: [Object] } ] }
+*/
