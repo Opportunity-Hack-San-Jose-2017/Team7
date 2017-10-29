@@ -1,4 +1,5 @@
 # Set up
+`npm install`
 Install ngrok http://ngrok.com/
 Make a .env file with content like so:
 ```
