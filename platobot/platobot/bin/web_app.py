@@ -1,12 +1,8 @@
 import logging
-import os
-import sys
 import json
-from datetime import datetime
 
 import requests
 from flask import Flask, request
-
 
 log = logging.getLogger(__name__)
 
@@ -19,6 +15,7 @@ class FacebookConfig:
     FACEBOOK_MESSAGEING_API = 'https://graph.facebook.com/v2.6/me/messages'
     VERIFY_TOKEN = 'moo'
     PAGE_ACCESS_TOKEN = 'EAARCCMNIDsQBAIqhyLHcQ2OaJlJtlXQgeDiug3Itk9HAYeZASZBhygKQ8SNf3ZC67wQ2vYqVg7zKErCCCvapLeShB6vD1c0gyNZBl1MLbFvItYcos6UwFZAKTBeaqcdpNMDoiYZCmASZAZCstCawyaUweZBKK1usFKhDCuUYnJ7e9QQZDZD'
+
 
 
 def send_message(recipient_id, message_text):
@@ -91,6 +88,19 @@ def facebook_webhook():
                     pass
 
     return "ok", 200
+
+
+@app.route('/', methods=['POST'])
+def twilio_webhook():
+    data = request.get_json()
+    log.debug(data)
+
+    return data
+
+
+@app.route('/', methods=['POST'])
+def twilio_send_message():
+    pass
 
 
 if __name__ == '__main__':

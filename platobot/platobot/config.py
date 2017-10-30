@@ -5,7 +5,7 @@ All config lives here.
 import logging
 import os
 
-from smsbot.utils import database
+from platobot.utils import database
 
 
 # Logging configs
@@ -22,7 +22,7 @@ class DevConfig(database.DBConfig):
         'password': 'root',
         'host': 'localhost',
         'port': '3306',
-        'database': 'smsbot',
+        'database': 'platobot',
         'charset': 'utf8mb4'
     }
 
@@ -38,7 +38,7 @@ class ProdConfig(database.DBConfig):
         'password': '',
         'host': 'localhost',
         'port': '3306',
-        'database': 'smsbot',
+        'database': 'platobot',
         'charset': 'utf8mb4'
     }
 

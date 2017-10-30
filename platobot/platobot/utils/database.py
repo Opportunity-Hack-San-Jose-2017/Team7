@@ -4,6 +4,8 @@ All database related infrastructure lives here
 
 import abc
 import contextlib
+import datetime
+import json
 import logging
 import os
 import threading
@@ -11,6 +13,8 @@ import threading
 import sqlalchemy
 from sqlalchemy import orm, event, exc
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.types import TypeDecorator
+from sqlalchemy.ext import mutable
 
 log = logging.getLogger(__name__)
 
@@ -276,3 +280,30 @@ class DBInterface(object):
             log.info('Database setup completed')
         else:
             print("Try again next time. Your response: {} Expected response: I agree".format(prompt))
+
+
+class JSONEncodedDict(TypeDecorator):
+    impl = sqlalchemy.Text
+
+    def serialize(self, obj):
+        if isinstance(obj, datetime.datetime):
+            return obj.__str__()
+        return obj
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            value = json.dumps(value, default=self.serialize)
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            try:
+                value = json.loads(value)
+            except ValueError:
+                # nothing we can do if this happens.
+                value = {}
+
+        return value
+
+
+mutable.MutableDict.associate_with(JSONEncodedDict)

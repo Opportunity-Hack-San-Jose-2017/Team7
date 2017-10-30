@@ -19,7 +19,7 @@ UPDATE:
 
   * **Project setup**
       * `./setup.sh` to setup the python virtual environment - put all setup steps here
-      * Make sure your virtual environment is activated while you are developing on the `smsbot` project.
+      * Make sure your virtual environment is activated while you are developing on the `platobot` project.
 
 
   * **Pycharm**
@@ -30,4 +30,4 @@ UPDATE:
         or CMD + SHIFT + . to show hidden files :)
 
   * **Dependencies:**
-    * Python dependencies are specified in requirements.txt - mainly used by smsbot
+    * Python dependencies are specified in requirements.txt - mainly used by platobot

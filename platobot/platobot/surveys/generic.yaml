@@ -1,0 +1,18 @@
+- field_name: 'user_init'
+  question: ''
+  type: 'str'
+- field_name: 'urgency'
+  question: 'From 1 (not urgent) to 5 (very urgent), how urgent do you need help?'
+  type: 'int'
+  range:
+    - min: 1
+    - max: 5
+- field_name: 'location'
+  question: 'Where are you right now?'
+  type: 'str'
+- field_name: 'type of event'
+  question: 'What type of event are you reporting? Reply 1 for earthquake 2 for hurricane'
+  type: 'options'
+  options:
+    - 'earthquake'
+    - 'hurricane'

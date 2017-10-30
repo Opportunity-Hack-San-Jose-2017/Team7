@@ -1,3 +1,3 @@
-from smsbot.utils import logging_utils
+from platobot.utils import logging_utils
 
 logging_utils.setup_root_logger_handler()
