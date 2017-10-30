@@ -4,7 +4,7 @@ from platobot.message import message_callback
 
 def init_request():
     state = 0
-    responses = ["hi", "4", "Kenya", "1", "need help, I'm trapped."]
+    responses = ["hi", "yes", "Kenya", "1", "I need help. I'm trapped."]
     user_number = "254-123-456-7890"
 
     print("{} sent: {}".format(user_number, responses[state]))

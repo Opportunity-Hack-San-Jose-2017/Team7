@@ -2,29 +2,37 @@ import datetime
 import sqlalchemy
 
 from platobot import models
-from platobot.surveys.survey_manager import SurveyManager
+from platobot.surveys import get_survey_manager
 from platobot.constants import SessionConfig
 db_interface = models.platobot_db
 
 
 def handle_user_input(user, channel, user_input_msg, user_submission_time):
+    """
+    Singleton session manager handles user input, for now
+    :param user: user contact, either phone number or facebook id
+    :param channel: as defined in platobot.constants.Channels
+    :param user_input_msg: message string from user
+    :param user_submission_time: time we received message from user
+    :return: response to user
+    """
     session = db_interface.new_session()
     record = session.query(models.Survey).filter(models.Survey.user == user,
                                                  models.Survey.channel == channel
                                                  ).order_by(sqlalchemy.desc(models.Survey.submission_time)).first()
 
-    if not record or record.state < 0 or datetime.datetime.utcnow() - record.submission_time > datetime.timedelta(seconds=SessionConfig.max_interval):
+    if not record or record.state < 0 or datetime.datetime.utcnow() - record.submission_time > datetime.timedelta(seconds=SessionConfig.timeout):
         record = models.Survey(user=user, channel=channel, state=0, creation_time=datetime.datetime.utcnow())
         session.add(record)
 
-    SurveyManager.record_user_response(record, user_input_msg, user_submission_time)
-    question = SurveyManager.get_next_question(record)
+    survey_manager = get_survey_manager(channel)
 
-    # message.send_message(channel, user=user, msg=question)
+    survey_manager.record_user_response(record, user_input_msg, user_submission_time)
+    response = survey_manager.get_response_to_user(record)
 
     session.commit()
     session.close()
-    return question
+    return response
 
 
 

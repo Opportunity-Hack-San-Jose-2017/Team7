@@ -1,4 +1,4 @@
 - field_name: 'description'
-  question: 'Please describe.'
+  text: 'Please describe.'
   type: 'str'
 

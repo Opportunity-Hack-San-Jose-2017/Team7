@@ -1,8 +1,15 @@
 import logging
 import json
+import datetime
 
 import requests
 from flask import Flask, request
+
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..'))
+from platobot.session_management import session_manager
+from platobot.constants import Channels
 
 log = logging.getLogger(__name__)
 
@@ -17,10 +24,12 @@ class FacebookConfig:
     PAGE_ACCESS_TOKEN = 'EAARCCMNIDsQBAIqhyLHcQ2OaJlJtlXQgeDiug3Itk9HAYeZASZBhygKQ8SNf3ZC67wQ2vYqVg7zKErCCCvapLeShB6vD1c0gyNZBl1MLbFvItYcos6UwFZAKTBeaqcdpNMDoiYZCmASZAZCstCawyaUweZBKK1usFKhDCuUYnJ7e9QQZDZD'
 
 
+def send_response(recipient_id, response):
+    """
+    Have the bot reply to user
+    """
 
-def send_message(recipient_id, message_text):
-
-    log.info("sending message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
+    log.info("sending message to {recipient}: {text}".format(recipient=recipient_id, text=response["text"]))
 
     params = {
         "access_token": FacebookConfig.PAGE_ACCESS_TOKEN
@@ -32,9 +41,7 @@ def send_message(recipient_id, message_text):
         "recipient": {
             "id": recipient_id
         },
-        "message": {
-            "text": message_text
-        }
+        "message": response
     })
     r = requests.post(FacebookConfig.FACEBOOK_MESSAGEING_API, params=params, headers=headers, data=data)
     if r.status_code != 200:
@@ -42,7 +49,7 @@ def send_message(recipient_id, message_text):
         log.info(r.text)
 
 
-@app.route('/', methods=['GET'])
+@app.route('/webhook', methods=['GET'])
 def facebook_verify():
     """
     When the endpoint is registered as a webhook, it must echo back
@@ -57,11 +64,12 @@ def facebook_verify():
     return "Hello world", 200
 
 
-@app.route('/', methods=['POST'])
+@app.route('/webhook', methods=['POST'])
 def facebook_webhook():
     """
     Endpoint for processing incoming messaging events
     """
+    request_time = datetime.datetime.utcnow()
     data = request.get_json()
     log.debug(data)
 
@@ -72,35 +80,31 @@ def facebook_webhook():
 
                 if messaging_event.get("message"):  # someone sent us a message
 
-                    sender_id = messaging_event["sender"]["id"]        # the facebook ID of the person sending you the message
-                    recipient_id = messaging_event["recipient"]["id"]  # the recipient's ID, which should be your page's facebook ID
-                    message_text = messaging_event["message"]["text"]  # the message's text
+                    # the facebook ID of the person sending you the message
+                    sender_id = messaging_event["sender"]["id"]
+                    # the recipient's ID, which should be your page's facebook ID
+                    recipient_id = messaging_event["recipient"]["id"]
+                    # the message's text
+                    message_text = messaging_event["message"].get("text")
 
-                    send_message(sender_id, "roger that!")
+                    response = session_manager.handle_user_input(sender_id, Channels.FACEBOOK,
+                                                                 message_text, request_time)
 
-                if messaging_event.get("delivery"):  # delivery confirmation
+                    send_response(sender_id, response)
+
+                # delivery confirmation
+                if messaging_event.get("delivery"):
                     pass
 
-                if messaging_event.get("optin"):  # optin confirmation
+                # optin confirmation
+                if messaging_event.get("optin"):
                     pass
 
-                if messaging_event.get("postback"):  # user clicked/tapped "postback" button in earlier message
+                # user clicked/tapped "postback" button in earlier message
+                if messaging_event.get("postback"):
                     pass
 
     return "ok", 200
-
-
-@app.route('/', methods=['POST'])
-def twilio_webhook():
-    data = request.get_json()
-    log.debug(data)
-
-    return data
-
-
-@app.route('/', methods=['POST'])
-def twilio_send_message():
-    pass
 
 
 if __name__ == '__main__':

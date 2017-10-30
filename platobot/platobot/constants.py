@@ -1,6 +1,8 @@
 class Channels:
     SMS = 'sms'
+    FACEBOOK = 'facebook'
+
 
 class SessionConfig:
     # in seconds
-    max_interval = 2
+    timeout = 100

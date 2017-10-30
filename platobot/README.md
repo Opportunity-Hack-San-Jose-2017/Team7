@@ -1,4 +1,4 @@
-# SMS-Bot
+# Plato-Bot
 
 This is a backend application (long running process) which will help orchestrate conversations
 
