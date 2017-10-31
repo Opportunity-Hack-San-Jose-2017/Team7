@@ -1,15 +1,23 @@
+"""
+Main entry
+"""
 import logging
 import json
 import datetime
-
-import requests
-from flask import Flask, request
-
 import sys
 import os
+from os.path import join, dirname
+import requests
+from dotenv import load_dotenv
+
+from flask import Flask, request
+
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..'))
 from platobot.session_management import session_manager
 from platobot.constants import Channels
+
+dotenv_path = join(dirname(__file__), '../.env')
+load_dotenv(dotenv_path)
 
 log = logging.getLogger(__name__)
 
@@ -19,10 +27,12 @@ app = Flask(__name__)
 
 class FacebookConfig:
 
+    USHAHIDI_API = 'http://35.203.151.94/platform/api/v3'
+    USHAHIDI_TOKEN = 'Bearer jWPuTIaLPoVBNgLd1kf96m0Q78H12JhCPSmeCswJ'
     FACEBOOK_MESSAGEING_API = 'https://graph.facebook.com/v2.6/me/messages'
     VERIFY_TOKEN = 'moo'
     PAGE_ACCESS_TOKEN = 'EAARCCMNIDsQBAIqhyLHcQ2OaJlJtlXQgeDiug3Itk9HAYeZASZBhygKQ8SNf3ZC67wQ2vYqVg7zKErCCCvapLeShB6vD1c0gyNZBl1MLbFvItYcos6UwFZAKTBeaqcdpNMDoiYZCmASZAZCstCawyaUweZBKK1usFKhDCuUYnJ7e9QQZDZD'
-
+    # PAGE_ACCESS_TOKEN = os.environ.get("PAGE_ACCESS_TOKEN")
 
 def send_response(recipient_id, response):
     """
