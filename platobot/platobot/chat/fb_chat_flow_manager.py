@@ -2,18 +2,21 @@ import datetime
 import sqlalchemy
 from platobot.constants import Channels, SessionConfig
 from platobot import models
+from platobot.utils.facebook_api import send_response
 
 db_interface = models.platobot_db
 
 # TODO: grab this from org info n stuff
 bot_intro = {
-    "text": "Hi, I'm a bot. Things I can do. Would you like to send a report?",
-    "quick_replies": {
+    "text": "Hi, I'm Plato bot. Here are things I can do.",
+    "quick_replies": [{
         "content_type": "text",
         "title": "Send a report",
         "payload": "ask_to_send_report"
-    }
+    }]
 }
+
+# TODO: make this into a class??
 
 def reply(messaging_event, request_time):
     # the facebook ID of the person sending you the message
@@ -25,13 +28,23 @@ def reply(messaging_event, request_time):
     message = messaging_event["message"]
     # TO DO: get different vals for different types of user input
     message_text = message.get("text", '')
+
+    response = get_reply_message(messaging_event);
+    if response is None:
+        return start_survey_flow(sender_id, recipient_id, message_text, request_time)
+    else:
+        send_response(sender_id, response)
+
+def get_reply_message(messaging_event):
+    message = messaging_event["message"]
+    # TO DO: get different vals for different types of user input
+    message_text = message.get("text", '')
     message_nlp = message.get("nlp")
     if message_nlp is not None:
         entities = message_nlp.get("entities")
         if hasGreetings(entities):
             return reply_to_greetings()
-
-    return start_survey_flow(sender_id, recipient_id, message_text, request_time)
+    return None
 
 def hasGreetings(entities):
     greetings = entities.get("greetings")

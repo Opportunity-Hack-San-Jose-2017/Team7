@@ -27,5 +27,5 @@ def send_response(recipient_id, response):
     })
     r = requests.post(FacebookConfig.FACEBOOK_MESSAGEING_API, params=params, headers=headers, data=data)
     if r.status_code != 200:
-        log.info(r.status_code)
-        log.info(r.text)
+        log.error(r.status_code)
+        log.error(r.text)

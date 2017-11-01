@@ -1,7 +1,7 @@
 import unittest
 import os
 import json
-from platobot.chat.fb_chat_flow_manager import reply
+from platobot.chat.fb_chat_flow_manager import get_reply_message
 
 def generate_greeting_intent():
     return {
@@ -43,14 +43,14 @@ class ChatFlowTestCases(unittest.TestCase):
         pass
 
     def test_reply_to_greetings(self):
-        response = reply(self.greetings)
-        self.assertCountEqual(response, {
-            "text": "Hi, I'm a bot. Things I can do. Would you like to send a report?",
-            "quick_replies": {
+        response = get_reply_message(self.greetings)
+        self.assertDictEqual(response, {
+            "text": "Hi, I'm Plato bot. Here are things I can do.",
+            "quick_replies": [{
                 "content_type": "text",
                 "title": "Send a report",
                 "payload": "ask_to_send_report"
-            }
+            }]
         })
 
     def tearDown(self):
