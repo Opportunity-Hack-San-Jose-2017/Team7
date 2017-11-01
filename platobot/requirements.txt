@@ -3,7 +3,9 @@ sqlalchemy==1.1.9
 # We should move to mysqlclient later on as it is highly performant
 pymysql==0.7.11
 
-requests==2.14.2
+oauthlib
+requests
+requests_oauthlib
 pytz==2017.2
 
 pyyaml
@@ -13,3 +15,5 @@ flask-restful==0.3.5
 Flask-Cors==2.1.0
 
 gunicorn==19.7.1
+
+python-dotenv==0.7.1
