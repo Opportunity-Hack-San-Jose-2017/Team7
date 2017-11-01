@@ -63,8 +63,6 @@ def generate_facebook_message():
     }
 
 class ApiTestCase(unittest.TestCase):
-    """This class represents the bucketlist test case"""
-
     def setUp(self):
         """Define test variables and initialize app."""
         app = create_app(TestConfig)
