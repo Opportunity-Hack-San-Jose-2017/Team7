@@ -73,3 +73,7 @@ class UshahidiConfig:
     # token expired
     USHAHIDI_TOKEN = 'Bearer jWPuTIaLPoVBNgLd1kf96m0Q78H12JhCPSmeCswJ'
 
+
+class APIAIConfig:
+    CLIENT_ACCESS_TOKEN = os.environ.get("APIAI_CLIENT_ACCESS_TOKEN")
+

@@ -1,10 +1,14 @@
 import datetime
 import sqlalchemy
+import apiai
+import json
 from platobot.constants import Channels, SessionConfig
+from platobot.config import APIAIConfig
 from platobot import models
 from platobot.utils.facebook_api import send_response
 
 db_interface = models.platobot_db
+ai = apiai.ApiAI(APIAIConfig.CLIENT_ACCESS_TOKEN)
 
 # TODO: grab this from org info n stuff
 bot_intro = {
@@ -29,13 +33,34 @@ def reply(messaging_event, request_time):
     # TO DO: get different vals for different types of user input
     message_text = message.get("text", '')
 
+    if is_in_middle_of_survey(messaging_event):
+        return start_survey_flow(sender_id, recipient_id, message_text, request_time)
+
     response = get_reply_message(messaging_event);
+
     if response is None:
         return start_survey_flow(sender_id, recipient_id, message_text, request_time)
     else:
         send_response(sender_id, response)
 
+def is_in_middle_of_survey(messaging_event):
+    sender_id = messaging_event["sender"]["id"]
+    session = db_interface.new_session()
+    # records = session.query(models.Survey).filter(models.Survey.unprocessed_user_message != None,
+    #                                                 models.Survey.state != -1).all()
+    record = session.query(models.Survey).filter(
+        models.Survey.user == sender_id,
+        models.Survey.state != -1
+        ).order_by(sqlalchemy.desc(models.Survey.message_submission_time)).first()
+    session.close()
+    if record is None:
+        return False
+
+    print('user: ' + record.user)
+    return True
+
 def get_reply_message(messaging_event):
+    sender_id = messaging_event["sender"]["id"]
     message = messaging_event["message"]
     # TO DO: get different vals for different types of user input
     message_text = message.get("text", '')
@@ -44,6 +69,23 @@ def get_reply_message(messaging_event):
         entities = message_nlp.get("entities")
         if hasGreetings(entities):
             return reply_to_greetings()
+
+    # let apiai handles the small talks
+    request = ai.text_request()
+    request.session_id = sender_id
+    request.query = message_text
+    apiai_response = json.loads(request.getresponse().read())
+    result = apiai_response["result"]
+    action = result.get("action")
+    speech = result['fulfillment']['speech']
+    if action == "reports.want_to_send":
+        # let survey flow starts
+        # TODO: refactor this part
+        return None
+    if speech is not None:
+        return {
+            "text": result['fulfillment']['speech']
+        }
     return None
 
 def hasGreetings(entities):
