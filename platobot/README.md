@@ -33,6 +33,9 @@ UPDATE:
   * **Dependencies:**
     * Python dependencies are specified in requirements.txt - mainly used by platobot
 
+## Test
+  * `./run_test.sh`
+
 ## mysql docker setup
     ```
     docker pull mysql/mysql-server
