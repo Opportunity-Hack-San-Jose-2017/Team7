@@ -4,13 +4,11 @@ from sqlalchemy.orm.attributes import flag_modified
 
 class SurveyManager(abc.ABC):
 
-    def record_user_response(self, survey_record, user_input_msg, user_submission_time):
+    def record_user_response(self, survey_record):
         """
         update user's response in db, update state of survey completion, and pull in new questions once we
         identify the survey template to use
         :param survey_record: survey from database
-        :param user_input_msg: message from user
-        :param user_submission_time: time we received message from user
         :return: None
         """
         state = survey_record.state
@@ -22,10 +20,11 @@ class SurveyManager(abc.ABC):
             # using this since json column is not updated with sqlalchemy
             flag_modified(survey_record, "survey")
 
-        survey_record.survey["fields"][state]["data"] = user_input_msg
-        survey_record.survey["fields"][state]["submission_time"] = user_submission_time
+        survey_record.survey["fields"][state]["data"] = survey_record.unprocessed_user_message
+        survey_record.survey["fields"][state]["submission_time"] = survey_record.message_submission_time
 
-        survey_record.submission_time = user_submission_time
+        survey_record.message_submission_time = survey_record.message_submission_time
+        survey_record.unprocessed_user_message = None
         return
 
     def init_survey(self, survey_record):
@@ -42,5 +41,5 @@ class SurveyManager(abc.ABC):
         return []
 
     @abc.abstractmethod
-    def get_response_to_user(self, survey_record):
+    def send_response_to_user(self, survey_record):
         return []

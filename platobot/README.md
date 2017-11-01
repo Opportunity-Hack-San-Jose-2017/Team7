@@ -6,7 +6,7 @@ UPDATE:
 
 * Stray files in Project root:
   * tox.ini -  This is how `tox` identifies, that the current directory is a tox project.
-  * python_requirements.txt - Define all the python dependencies here, tox reads this to get list of third party packages and versions to install in the venv.
+  * requirements.txt - Define all the python dependencies here, tox reads this to get list of third party packages and versions to install in the venv.
   * activate - This script can be sourced to activate the venv in the current shell session. So instead of referring `.tox/py36/bin/python`, we can just run python scripts with `python`.
   * .gitignore - Standard file in a git project to exclude files not intended to be put in version control.
   * setup.sh - Intended to be the sole script we could run to setup this project (run tox, create angular build, etc)
@@ -31,3 +31,11 @@ UPDATE:
 
   * **Dependencies:**
     * Python dependencies are specified in requirements.txt - mainly used by platobot
+
+## Run Guide:
+
+  * To bootstrap database, run 'python platobot/bin/bootstrap_db.py'. Enter 'I agree' to confirm.
+
+  * To run flask server, run './run_server.sh'. To stop server and kill daemon processes, run './stop_server.sh'.
+
+  * To run gunicorn server(serve multiple http requests at same time), run './server.sh start'. To stop it and kill daemon processes, run './server.sh stop'.

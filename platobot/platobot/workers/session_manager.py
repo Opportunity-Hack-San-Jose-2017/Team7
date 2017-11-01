@@ -19,23 +19,17 @@ def handle_user_input(user, channel, user_input_msg, user_submission_time):
     session = db_interface.new_session()
     record = session.query(models.Survey).filter(models.Survey.user == user,
                                                  models.Survey.channel == channel
-                                                 ).order_by(sqlalchemy.desc(models.Survey.submission_time)).first()
+                                                 ).order_by(sqlalchemy.desc(models.Survey.message_submission_time)).first()
 
-    if not record or record.state < 0 or datetime.datetime.utcnow() - record.submission_time > datetime.timedelta(seconds=SessionConfig.timeout):
+    if not record or record.state < 0 or datetime.datetime.utcnow() - record.message_submission_time > datetime.timedelta(seconds=SessionConfig.TIMEOUT):
         record = models.Survey(user=user, channel=channel, state=0, creation_time=datetime.datetime.utcnow())
         session.add(record)
 
     survey_manager = get_survey_manager(channel)
 
-    survey_manager.record_user_response(record, user_input_msg, user_submission_time)
+    survey_manager.record_user_response(record)
     response = survey_manager.get_response_to_user(record)
 
     session.commit()
     session.close()
     return response
-
-
-
-
-
-

@@ -44,3 +44,10 @@ class ProdConfig(database.DBConfig):
 
 
 DATABASE_CONFIG = DevConfig
+
+
+class FacebookConfig:
+
+    FACEBOOK_MESSAGEING_API = 'https://graph.facebook.com/v2.6/me/messages'
+    VERIFY_TOKEN = 'moo'
+    PAGE_ACCESS_TOKEN = 'EAARCCMNIDsQBAIqhyLHcQ2OaJlJtlXQgeDiug3Itk9HAYeZASZBhygKQ8SNf3ZC67wQ2vYqVg7zKErCCCvapLeShB6vD1c0gyNZBl1MLbFvItYcos6UwFZAKTBeaqcdpNMDoiYZCmASZAZCstCawyaUweZBKK1usFKhDCuUYnJ7e9QQZDZD'

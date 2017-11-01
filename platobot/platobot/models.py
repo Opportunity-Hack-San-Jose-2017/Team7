@@ -24,4 +24,5 @@ class Survey(platobot_db.BASE_MODEL):
     survey = db.Column(database.JSONEncodedDict)
     state = db.Column(db.Integer)
     creation_time = db.Column(db.DateTime)
-    submission_time = db.Column(db.DateTime)
+    unprocessed_user_message = db.Column(db.String(140))
+    message_submission_time = db.Column(db.DateTime)

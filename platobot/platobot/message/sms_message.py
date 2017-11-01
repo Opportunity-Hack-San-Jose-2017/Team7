@@ -1,6 +1,6 @@
 import datetime
 from platobot.constants import Channels
-from platobot.session_management import session_manager
+from platobot.workers import session_manager
 
 
 def message_callback(user_number='', msg=''):

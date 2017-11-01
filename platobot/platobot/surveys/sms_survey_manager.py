@@ -11,7 +11,7 @@ class SMSSurveyManager(SurveyManager):
                                                                  "sms/generic.yaml")))
         self.complete_msg = 'Report completed.'
 
-    def get_response_to_user(self, survey_record):
+    def send_response_to_user(self, survey_record):
         try:
             survey_record.state += 1
             return survey_record.survey["fields"][survey_record.state]["text"]
