@@ -1,3 +1,4 @@
+import logging
 import datetime
 import sqlalchemy
 import apiai
@@ -9,10 +10,25 @@ from platobot.utils.facebook_api import send_response
 
 db_interface = models.platobot_db
 ai = apiai.ApiAI(APIAIConfig.CLIENT_ACCESS_TOKEN)
+log = logging.getLogger(__name__)
+
+class Action(object):
+    def __init__(self, action, suggested_reply):
+        self.action = action
+        self.suggested_reply = suggested_reply
 
 # TODO: grab this from org info n stuff
 bot_intro = {
     "text": "Hi, I'm Plato bot. Here are things I can do.",
+    "quick_replies": [{
+        "content_type": "text",
+        "title": "Send a report",
+        "payload": "ask_to_send_report"
+    }]
+}
+
+when_bot_is_confused = {
+    "text": "Sorry. I don't quite understand that. But here are things I can do",
     "quick_replies": [{
         "content_type": "text",
         "title": "Send a report",
@@ -42,60 +58,39 @@ def reply(messaging_event, request_time):
                     message_text = "latitude: {}, longitude: {}".format(coordinates.get('lat', ''),
                                                                         coordinates.get('long', ''))
 
-    if is_in_middle_of_survey(messaging_event):
-        return start_survey_flow(sender_id, recipient_id, message_text, request_time)
+    action = get_user_intent_with_suggested_reply(messaging_event)
+    log.info("Bot action %s", action.action)
+    if action is not None:
+        if action.action == "smalltalk.confirmation.cancel":
+            return cancel_survey_flow(sender_id, recipient_id, message_text, request_time)
+        elif is_in_middle_of_survey(messaging_event):
+            return start_survey_flow(sender_id, recipient_id, message_text, request_time)
+        elif action.action == "reports.want_to_send":
+            return start_survey_flow(sender_id, recipient_id, message_text, request_time)
+        else:
+            if not action.suggested_reply.get("text"):
+                action.suggested_reply = when_bot_is_confused
+            return send_response(sender_id, action.suggested_reply)
+    return send_response(sender_id, bot_fall_back_action().suggested_reply)
 
-    response = get_reply_message(messaging_event);
-
-    if response is None:
-        return start_survey_flow(sender_id, recipient_id, message_text, request_time)
-    else:
-        send_response(sender_id, response)
-
-def is_in_middle_of_survey(messaging_event):
-    # return True
-    sender_id = messaging_event["sender"]["id"]
-    session = db_interface.new_session()
-    # records = session.query(models.Survey).filter(models.Survey.unprocessed_user_message != None,
-    #                                                 models.Survey.state != -1).all()
-    record = session.query(models.Survey).filter(
-        models.Survey.user == sender_id,
-        models.Survey.state != -1
-        ).order_by(sqlalchemy.desc(models.Survey.message_submission_time)).first()
-    session.close()
-    if record is None:
-        return False
-
-    print('user: ' + record.user)
-    return True
-
-def get_reply_message(messaging_event):
+def get_user_intent_with_suggested_reply(messaging_event):
     sender_id = messaging_event["sender"]["id"]
     message = messaging_event["message"]
-    # TO DO: get different vals for different types of user input
     message_text = message.get("text", '')
     message_nlp = message.get("nlp")
+    log.info("Get user intent from facebook wit ai")
+    intent = get_user_intent_from_fb_wit_ai(message_text, message_nlp);
+    if intent is None:
+        log.info("Nothing to use from wit.ai, consulting apiai...")
+        intent = get_user_intent_from_apiai(sender_id, message_text)
+    log.info(intent)
+    return intent
+
+def get_user_intent_from_fb_wit_ai(message_text, message_nlp):
     if message_nlp is not None:
         entities = message_nlp.get("entities")
         if hasGreetings(entities):
-            return reply_to_greetings()
-
-    # let apiai handles the small talks
-    request = ai.text_request()
-    request.session_id = sender_id
-    request.query = message_text
-    apiai_response = json.loads(request.getresponse().read())
-    result = apiai_response["result"]
-    action = result.get("action")
-    speech = result['fulfillment']['speech']
-    if action == "reports.want_to_send":
-        # let survey flow starts
-        # TODO: refactor this part
-        return None
-    if speech is not None:
-        return {
-            "text": result['fulfillment']['speech']
-        }
+            return Action("greetings", bot_intro)
     return None
 
 def hasGreetings(entities):
@@ -105,19 +100,85 @@ def hasGreetings(entities):
             return True
     return False
 
-def reply_to_greetings():
-    return bot_intro
+def get_user_intent_from_apiai(session_id, message_text):
+    request = ai.text_request()
+    request.session_id = session_id
+    request.query = message_text
+    apiai_response = json.loads(request.getresponse().read())
+    result = apiai_response.get("result")
+    if result is None:
+        return bot_fall_back_action()
 
-def smalltalk():
+    action = result.get("action")
+    speech = result['fulfillment']['speech']
+
+    return Action(action, {"text": speech})
+
+def bot_fall_back_action():
+    return Action(None, when_bot_is_confused)
+
+def get_reply_message(messaging_event):
+    sender_id = messaging_event["sender"]["id"]
+    message = messaging_event["message"]
+    message_text = message.get("text", '')
+    message_nlp = message.get("nlp")
+    log.info("Get user intent from facebook wit ai")
+    intent = get_user_intent_from_fb_wit_ai(message_text, message_nlp);
+    if intent is None:
+        log.info("Nothing to use from wit.ai, consulting apiai...")
+        intent = get_user_intent_from_apiai(sender_id, message_text)
+    log.info(intent)
+    return intent
+
+def get_user_intent_from_fb_wit_ai(message_text, message_nlp):
+    if message_nlp is not None:
+        entities = message_nlp.get("entities")
+        if hasGreetings(entities):
+            return Action("greetings", bot_intro)
+    return None
+
+def hasGreetings(entities):
+    greetings = entities.get("greetings")
+    if greetings is not None and greetings[0] is not None:
+        if greetings[0]["confidence"] > 0.9:
+            return True
+    return False
+
+def get_user_intent_from_apiai(session_id, message_text):
+    request = ai.text_request()
+    request.session_id = session_id
+    request.query = message_text
+    apiai_response = json.loads(request.getresponse().read())
+    result = apiai_response.get("result")
+    if result is None:
+        return bot_fall_back_action()
+
+    action = result.get("action")
+    speech = result['fulfillment']['speech']
+
+    return Action(action, {"text": speech})
+
+def bot_fall_back_action():
+    return Action(None, when_bot_is_confused)
+
+def is_in_middle_of_survey(messaging_event):
+    sender_id = messaging_event["sender"]["id"]
+    session = db_interface.new_session()
+    record = session.query(models.Survey).filter(
+        models.Survey.user == sender_id,
+        models.Survey.state != -1
+        ).order_by(sqlalchemy.desc(models.Survey.message_submission_time)).first()
+    session.close()
+    if record is None:
+        return False
+
+    return True
+
+def cancel_survey_flow(sender_id, recipient_id, message_text, request_time):
     pass
 
 def start_survey_flow(sender_id, recipient_id, message_text, request_time):
     save_user_message(sender_id, Channels.FACEBOOK, message_text, request_time)
-    # response = session_manager.handle_user_input(sender_id, Channels.FACEBOOK,
-    #                                             message_text, request_time)
-
-    # send_response(sender_id, response)
-
 
 def save_user_message(user, channel, user_message, user_message_time):
     session = db_interface.new_session()
