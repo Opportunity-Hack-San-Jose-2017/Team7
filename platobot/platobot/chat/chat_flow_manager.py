@@ -44,6 +44,7 @@ def reply(messaging_event, request_time):
         send_response(sender_id, response)
 
 def is_in_middle_of_survey(messaging_event):
+    # return True
     sender_id = messaging_event["sender"]["id"]
     session = db_interface.new_session()
     # records = session.query(models.Survey).filter(models.Survey.unprocessed_user_message != None,

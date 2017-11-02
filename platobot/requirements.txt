@@ -18,3 +18,5 @@ gunicorn==19.7.1
 
 python-dotenv==0.7.1
 apiai
+
+twilio==6.8.2

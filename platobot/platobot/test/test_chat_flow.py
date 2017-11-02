@@ -1,7 +1,7 @@
 import unittest
 import os
 import json
-from platobot.chat.fb_chat_flow_manager import get_reply_message
+from platobot.chat.chat_flow_manager import get_reply_message
 
 def generate_greeting_intent():
     return {

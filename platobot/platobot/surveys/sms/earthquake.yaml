@@ -1,4 +1,3 @@
 - field_name: 'description'
   text: 'Please describe.'
   type: 'str'
-

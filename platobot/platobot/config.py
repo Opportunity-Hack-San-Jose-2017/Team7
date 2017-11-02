@@ -68,6 +68,7 @@ class FacebookConfig:
     # PAGE_ACCESS_TOKEN = 'EAARCCMNIDsQBAIqhyLHcQ2OaJlJtlXQgeDiug3Itk9HAYeZASZBhygKQ8SNf3ZC67wQ2vYqVg7zKErCCCvapLeShB6vD1c0gyNZBl1MLbFvItYcos6UwFZAKTBeaqcdpNMDoiYZCmASZAZCstCawyaUweZBKK1usFKhDCuUYnJ7e9QQZDZD'
     PAGE_ACCESS_TOKEN = os.environ.get("PAGE_ACCESS_TOKEN")
 
+
 class UshahidiConfig:
     USHAHIDI_API = 'http://35.203.151.94/platform/api/v3'
     # token expired
@@ -75,5 +76,11 @@ class UshahidiConfig:
 
 
 class APIAIConfig:
+    # CLIENT_ACCESS_TOKEN = '9d5b69f4c2504d298b7a4331ad6c9644'
     CLIENT_ACCESS_TOKEN = os.environ.get("APIAI_CLIENT_ACCESS_TOKEN")
 
+
+class TwilioConfig:
+    ACCOUNT_SID = 'ACcc1ea4a766dad380e75e8a053fbb7585'
+    AUTH_TOKEN = '8054e1a09e67e381256bcbbd2a4a55b5'
+    NUMBER = '+16288000053'
