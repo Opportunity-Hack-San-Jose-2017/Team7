@@ -7,11 +7,14 @@ Provides abstractions for making calls to Ushahidi instances
 * UshahidiClient: Subclass of HTTPClient with Ushahidi Auth stuff built in
 
 """
+import json
 import os
 
 import requests
 from oauthlib.oauth2 import LegacyApplicationClient
 from requests_oauthlib import OAuth2Session
+
+from platobot.platobot.ushahidi.ds import Form, FormAttribute, Post
 
 
 class ImmutableRequest(Exception):
@@ -78,7 +81,7 @@ class RequestBuilder:
         """
         if self.__built:
             raise ImmutableRequest
-        self._sub_urls.append(url.strip('/'))
+        self._sub_urls.append(str(url).strip('/'))
         return self
 
     def key(self, key: any):
@@ -95,7 +98,10 @@ class RequestBuilder:
         return self
 
     def request_body(self, content: any):
-        self._request_body = content
+        if type(content) == dict:
+            self._request_body = json.dumps(content)
+        else:
+            self._request_body = content
         return self
 
     def build(self) -> Request:
@@ -157,7 +163,7 @@ class HttpClient:
             raise NotImplementedError('Method: {} is not implemented yet')
 
 
-class UdahishiClient(HttpClient):
+class UshahidiClient(HttpClient):
     """
     Make requests to Ushahidi instance with authorization built in
     """
@@ -208,24 +214,92 @@ class UdahishiClient(HttpClient):
         """
         return RequestBuilder().suburl('api/v3')
 
+    def get_forms(self) -> [Form]:
+        """
+        Get list of forms
+        """
+        request = (self.get_request_builder()
+                   .suburl('forms')
+                   ).build()
+        response = self.get(request=request)
+        if response.status_code != 200:
+            raise IOError('Failed request: {}'.format(request.__dict__))
+        return [Form.deserialize(json_blob) for json_blob in response.json().get('results')]
+
+    def get_attributes(self, form_id: any) -> [FormAttribute]:
+        """
+        :return:
+        """
+        request = (self.get_request_builder()
+                   .suburl('forms')
+                   .key(form_id)
+                   .suburl('attributes')
+                   ).build()
+        response = self.get(request=request)
+        if response.status_code != 200:
+            raise IOError('Failed request: {}'.format(request.__dict__))
+        return [FormAttribute.deserialize(json_blob) for json_blob in response.json().get('results')]
+
+    def get_posts(self):
+        """
+        :param post:
+        :return:
+        """
+        request = (self.get_request_builder()
+                   .suburl('posts')
+                   ).build()
+        response = self.get(request=request)
+        if response.status_code != 200:
+            raise IOError('Failed request: {}'.format(request.__dict__))
+        return [Post.deserialize(json_blob) for json_blob in response.json().get('results')]
+
+    def save_post(self, post: Post):
+        """
+        :param post:
+        :return:
+        """
+        request = (self.get_request_builder()
+                   .suburl('posts')
+                   .request_body(post.get_json())
+                   ).build()
+        response = self.post(request=request)
+        if response.status_code != 200:
+            raise IOError('Failed request: {}'.format(request.__dict__))
+        return Post(**response.json())
+
+    def update_post(self, post: Post):
+        """
+        :param post:
+        :return:
+        """
+        if not post.id:
+            raise ValueError('Post object should have an id since this is an update operation')
+        request = (self.get_request_builder()
+                   .suburl('posts')
+                   .key(post.id)
+                   .request_body(post.get_json())
+                   ).build()
+        response = self.put(request=request)
+        if response.status_code != 200:
+            raise IOError('Failed request: {}'.format(request.__dict__))
+        return Post(**response.json())
+
 
 if __name__ == '__main__':
-    """
-    Get list of surveys
-    """
-    client = UdahishiClient()
-    request = (client
-               .get_request_builder()
-               .suburl('forms')
-               ).build()
-    response = client.get(request=request)
-    surveys = response.json()
-    # Get specific survey
-    request = (client
-               .get_request_builder()
-               .suburl('forms')
-               .key(1)
-               ).build()
-    response = client.get(request=request)
-    survey = response.json()
-    print(response)
+    # Get Client
+    client = UshahidiClient()
+    # Get forms
+    forms = client.get_forms()
+    main_form = forms[0]
+    # Get attributes (not being used, we will use it later)
+    attributes = client.get_attributes(1)
+    # Get posts
+    posts = client.get_posts()
+    # Create a new post and save it via API
+    post = Post(title='Violence incident', content="Halp me")
+    post.set_form(form=main_form)
+    saved_post = client.save_post(post)
+    # Update title of saved_post
+    saved_post.title = 'Violence incident [update]'
+    updated_post = client.update_post(saved_post)
+    print(updated_post)
