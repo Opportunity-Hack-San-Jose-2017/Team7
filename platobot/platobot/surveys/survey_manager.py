@@ -17,11 +17,11 @@ class SurveyManager(abc.ABC):
             self.init_survey(survey_record)
         elif state == len(self.get_generic_survey_fields()) - 1:
             survey_record.survey["fields"].extend(self.get_survey_specs())
-            # using this since json column is not updated with sqlalchemy
-            flag_modified(survey_record, "survey")
 
         survey_record.survey["fields"][state]["data"] = survey_record.unprocessed_user_message
         survey_record.survey["fields"][state]["submission_time"] = survey_record.message_submission_time
+        # using this since json column is not updated with sqlalchemy
+        flag_modified(survey_record, "survey")
 
         survey_record.message_submission_time = survey_record.message_submission_time
         survey_record.unprocessed_user_message = None

@@ -30,8 +30,17 @@ def reply(messaging_event, request_time):
     # the message's text
 
     message = messaging_event["message"]
-    # TO DO: get different vals for different types of user input
+    # TODO: clean up this hacky code...
     message_text = message.get("text", '')
+    if not message_text:
+        attachments = message.get("attachments")
+        if attachments:
+            payload = attachments[0].get("payload")
+            if payload:
+                coordinates = payload.get('coordinates')
+                if coordinates:
+                    message_text = "latitude: {}, longitude: {}".format(coordinates.get('lat', ''),
+                                                                        coordinates.get('long', ''))
 
     if is_in_middle_of_survey(messaging_event):
         return start_survey_flow(sender_id, recipient_id, message_text, request_time)
