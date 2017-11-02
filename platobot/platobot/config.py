@@ -65,8 +65,8 @@ DATABASE_CONFIG = DevConfig
 class FacebookConfig:
     FACEBOOK_MESSAGEING_API = 'https://graph.facebook.com/v2.6/me/messages'
     VERIFY_TOKEN = 'moo'
-    # PAGE_ACCESS_TOKEN = 'EAARCCMNIDsQBAIqhyLHcQ2OaJlJtlXQgeDiug3Itk9HAYeZASZBhygKQ8SNf3ZC67wQ2vYqVg7zKErCCCvapLeShB6vD1c0gyNZBl1MLbFvItYcos6UwFZAKTBeaqcdpNMDoiYZCmASZAZCstCawyaUweZBKK1usFKhDCuUYnJ7e9QQZDZD'
-    PAGE_ACCESS_TOKEN = os.environ.get("PAGE_ACCESS_TOKEN")
+    PAGE_ACCESS_TOKEN = 'EAARCCMNIDsQBAIqhyLHcQ2OaJlJtlXQgeDiug3Itk9HAYeZASZBhygKQ8SNf3ZC67wQ2vYqVg7zKErCCCvapLeShB6vD1c0gyNZBl1MLbFvItYcos6UwFZAKTBeaqcdpNMDoiYZCmASZAZCstCawyaUweZBKK1usFKhDCuUYnJ7e9QQZDZD'
+    # PAGE_ACCESS_TOKEN = os.environ.get("PAGE_ACCESS_TOKEN")
 
 
 class UshahidiConfig:
@@ -76,8 +76,8 @@ class UshahidiConfig:
 
 
 class APIAIConfig:
-    # CLIENT_ACCESS_TOKEN = '9d5b69f4c2504d298b7a4331ad6c9644'
-    CLIENT_ACCESS_TOKEN = os.environ.get("APIAI_CLIENT_ACCESS_TOKEN")
+    CLIENT_ACCESS_TOKEN = '9d5b69f4c2504d298b7a4331ad6c9644'
+    # CLIENT_ACCESS_TOKEN = os.environ.get("APIAI_CLIENT_ACCESS_TOKEN")
 
 
 class TwilioConfig:
