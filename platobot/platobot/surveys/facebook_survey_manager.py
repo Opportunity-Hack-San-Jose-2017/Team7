@@ -10,9 +10,9 @@ log = logging.getLogger(__name__)
 class FacebookSurveyManager(SurveyManager):
     def __init__(self):
 
-        self.generic_survey_fields = yaml.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                                 "facebook/kenya.yaml")))
-        print(self.generic_survey_fields)
+        #self.generic_survey_fields = yaml.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+        #                                                         "facebook/kenya.yaml")))
+        #print(self.generic_survey_fields)
         self.complete_msg = {"text": "Report completed!"}
         self.ushahidi_client = ushahidi_http.UshahidiClient()
         forms = self.ushahidi_client.get_forms()
@@ -24,7 +24,7 @@ class FacebookSurveyManager(SurveyManager):
                 break
         self.form_attributes = self.ushahidi_client.get_attributes(self.form.id)
 
-        # TODO: build the form here and remember to store the keys for attributes
+        # build the form here and remember to store the keys for attributes
         # example:
         # Location
         # key: 448ed837-eecb-4306-967e-b394540ea863
@@ -32,7 +32,7 @@ class FacebookSurveyManager(SurveyManager):
         # key: 4f48b8c4-7615-405d-9113-1844371ba01e
         # later use keys to look up and store as values
 
-        self.generic_survey_fields = [{'text': 'first msg'}]
+        self.generic_survey_fields = [{'text': 'first msg', 'priority': 0}]
         for attribute in self.form_attributes:
             log.info(str(attribute))
             log.info(str(attribute.instructions))
@@ -42,12 +42,8 @@ class FacebookSurveyManager(SurveyManager):
             log.info(str(attribute.type_))
             log.info(str(attribute.misc_json_data))
             # options = ["Life threatening", "It can wait a few hours", "Not urgent"]
-            if attribute.type_ == 'title':
-                self.title_instruction = attribute.instructions
-                self.generic_survey_fields.append({'text': attribute.instructions, "key": 'title'})
-            elif attribute.type_ == 'description':
-                self.description_instruction = attribute.instructions
-                self.generic_survey_fields.append({'text': attribute.instructions, "key": 'description'})
+            if attribute.type_ == 'title' or attribute.type_ == 'description':
+                self.generic_survey_fields.append({'text': attribute.instructions, "key": attribute.type_, "priority": attribute.misc_json_data.get('priority') })
             else:
                 # note: location has a specific input==location
                 item = {
@@ -55,6 +51,7 @@ class FacebookSurveyManager(SurveyManager):
                     "key": attribute.key,
                     "input": attribute.input,
                     "type": attribute.type_,
+                    "priority": attribute.misc_json_data.get('priority')
                 }
                 if attribute.input == "location":
                     quick_replies = [{
@@ -77,16 +74,17 @@ class FacebookSurveyManager(SurveyManager):
 
                 self.generic_survey_fields.append(item)
                 print(self.generic_survey_fields)
-
+        self.generic_survey_fields.sort(key=lambda x: x['priority'])
+        print(self.generic_survey_fields)
 
     def send_response_to_user(self, survey_record):
         try:
+            self._survey_complete_hook(survey_record)
             survey_record.state += 1
             response = survey_record.survey["fields"][survey_record.state]
         except IndexError:
             survey_record.state = -1
             response = self.complete_msg
-            self._survey_complete_hook(survey_record)
         finally:
             send_response(survey_record.user, response)
 
@@ -105,27 +103,31 @@ class FacebookSurveyManager(SurveyManager):
         fields = survey_record.survey["fields"]
         for field in fields:
             if field.get('key') == 'title':
-                title = field.get('data')
+                if field.get('data'):
+                    title = field.get('data')
             elif field.get('key') == 'description':
-                description = field.get('data')
+                if field.get('data'):
+                    description = field.get('data')
 
             # here should check for other values using the attribute key
             elif field.get('input') == 'location':
                 # if it doesn't have lat, long, we're in trouble??
                 loc = field.get('data') # "latitude: 37.4213457, longitude: -121.8619215"
                 # ;)
-                try:
-                    lat = float(loc.split(',')[0].split(':')[1])
-                    lon = float(loc.split(',')[1].split(':')[1])
-                finally:
-                    lat = 0
-                    lon = 0
-                # values['448ed837-eecb-4306-967e-b394540ea863'] = [{"lat": lat, "lon": lon}]
-                if field.get('key') is not None:
-                    values[field.get('key')] = [{"lat": lat, "lon": lon}]
+                if loc:
+                    try:
+                        lat = float(loc.split(',')[0].split(':')[1])
+                        lon = float(loc.split(',')[1].split(':')[1])
+                    finally:
+                        lat = 0
+                        lon = 0
+                    # values['448ed837-eecb-4306-967e-b394540ea863'] = [{"lat": lat, "lon": lon}]
+                    if field.get('key') is not None:
+                        values[field.get('key')] = [{"lat": lat, "lon": lon}]
             else:
-                if field.get('key') is not None:
-                    values[field.get('key')] = [field.get('data')]
+                if field.get('data'):
+                    if field.get('key') is not None:
+                        values[field.get('key')] = [field.get('data')]
 
         # notes, the "key" need to be used in values, should grab keys dynamically ^^^
         # Location
@@ -138,11 +140,21 @@ class FacebookSurveyManager(SurveyManager):
         #                    '4f48b8c4-7615-405d-9113-1844371ba01e': ["Not Urgent"]
         #                 },
         #                status='published')
-
-        post = ds.Post(title=title, content=description, values=values, status='published')
-        post.set_form(self.form)
-        self.ushahidi_client.save_post(post)
-        log.info('Sent to Ushahidi')
+        if title:
+            if survey_record.post_id is None:
+                post = ds.Post(title=title, content=description, values=values, status='published')
+                post.set_form(self.form)
+                post = self.ushahidi_client.save_post(post)
+                survey_record.post_id = post.id
+                print("post id = {}".format(survey_record.post_id))
+                log.info('Created new post on Ushahidi')
+            else:
+                post = self.ushahidi_client.get_post(survey_record.post_id)
+                if description:
+                    post.content = description
+                post.values = values
+                self.ushahidi_client.update_post(post)
+                log.info('Updated post on Ushahidi')
 
     def get_survey_specs(self):
         """this won't be used anymore since we are getting survey from Ushahidi"""
