@@ -7,8 +7,8 @@ import os
 from oauthlib.oauth2 import LegacyApplicationClient
 from requests_oauthlib import OAuth2Session
 
-from platobot.platobot.ushahidi.ds import Form, FormAttribute, Post
-from platobot.platobot.ushahidi.http_base import HttpClient, RequestBuilder, Request
+from platobot.ushahidi.ds import Form, FormAttribute, Post
+from platobot.ushahidi.http_base import HttpClient, RequestBuilder, Request
 
 
 class UshahidiClient(HttpClient):

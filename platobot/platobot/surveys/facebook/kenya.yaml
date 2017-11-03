@@ -1,0 +1,23 @@
+- text: "user init"
+
+- text: "What is the title of your report"
+
+- text: "How urgent is the situation?"
+  quick_replies:
+    - content_type: "text"
+      title: "Life threatening"
+      payload: "reply1"
+    - content_type: "text"
+      title: "It can wait a few hours"
+      payload: "reply2"
+    - content_type: "text"
+      title: "Not urgent"
+      payload: "reply3"
+
+- text: "What is your location?"
+  quick_replies:
+    - content_type: "location"
+      title: "location"
+      payload: "reply3"
+
+- text: "Please describe."

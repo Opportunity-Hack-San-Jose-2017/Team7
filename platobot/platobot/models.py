@@ -23,6 +23,8 @@ class Survey(platobot_db.BASE_MODEL):
     channel = db.Column(db.String(20))
     survey = db.Column(database.JSONEncodedDict)
     state = db.Column(db.Integer)
+    # post id from Ushahidi
+    post_id = db.Column(db.Integer)
     creation_time = db.Column(db.DateTime)
     unprocessed_user_message = db.Column(db.String(140))
     message_submission_time = db.Column(db.DateTime)

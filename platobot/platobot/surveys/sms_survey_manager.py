@@ -25,6 +25,7 @@ class SMSSurveyManager(SurveyManager):
             self.send_response(survey_record.user, response)
 
     def get_survey_specs(self):
+        """this won't be used anymore since we are getting survey from Ushahidi"""
         return yaml.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "sms/earthquake.yaml")))
 
     def get_generic_survey_fields(self):

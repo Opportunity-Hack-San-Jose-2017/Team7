@@ -58,20 +58,22 @@ def reply(messaging_event, request_time):
                     message_text = "latitude: {}, longitude: {}".format(coordinates.get('lat', ''),
                                                                         coordinates.get('long', ''))
 
-    action = get_user_intent_with_suggested_reply(messaging_event)
-    log.info("Bot action %s", action.action)
-    if action is not None:
-        if action.action == "smalltalk.confirmation.cancel":
-            return cancel_survey_flow(sender_id, recipient_id, message_text, request_time)
-        elif is_in_middle_of_survey(messaging_event):
-            return start_survey_flow(sender_id, recipient_id, message_text, request_time)
-        elif action.action == "reports.want_to_send":
-            return start_survey_flow(sender_id, recipient_id, message_text, request_time)
-        else:
-            if not action.suggested_reply.get("text"):
-                action.suggested_reply = when_bot_is_confused
-            return send_response(sender_id, action.suggested_reply)
-    return send_response(sender_id, bot_fall_back_action().suggested_reply)
+    #action = get_user_intent_with_suggested_reply(messaging_event)
+    #log.info("Bot action %s", action.action)
+    return start_survey_flow(sender_id, recipient_id, message_text, request_time)
+
+    # if action is not None:
+    #     if action.action == "smalltalk.confirmation.cancel":
+    #         return cancel_survey_flow(sender_id, recipient_id, message_text, request_time)
+    #     elif is_in_middle_of_survey(messaging_event):
+    #         return start_survey_flow(sender_id, recipient_id, message_text, request_time)
+    #     elif action.action == "reports.want_to_send":
+    #         return start_survey_flow(sender_id, recipient_id, message_text, request_time)
+    #     else:
+    #         if not action.suggested_reply.get("text"):
+    #             action.suggested_reply = when_bot_is_confused
+    #         return send_response(sender_id, action.suggested_reply)
+    # return send_response(sender_id, bot_fall_back_action().suggested_reply)
 
 def get_user_intent_with_suggested_reply(messaging_event):
     sender_id = messaging_event["sender"]["id"]

@@ -87,7 +87,7 @@ class FormAttribute(UshahidiDataStructure):
     """
 
     def __init__(self, id: int, url: str, key: str, label: str, type: str, input: str, required: bool,
-                 default: str, **kwargs):
+                 default: str, instructions: str, **kwargs):
         self.id = id
         self.url = url
         self.key = key
@@ -97,6 +97,7 @@ class FormAttribute(UshahidiDataStructure):
         self.default = default
         self.type_ = type
         self.misc_json_data = kwargs
+        self.instructions = instructions
         self.__transform()
 
     def __repr__(self):

@@ -15,8 +15,8 @@ class SurveyManager(abc.ABC):
 
         if state == 0:
             self.init_survey(survey_record)
-        elif state == len(self.get_generic_survey_fields()) - 1:
-            survey_record.survey["fields"].extend(self.get_survey_specs())
+        #elif state == len(self.get_generic_survey_fields()) - 1:
+        #    survey_record.survey["fields"].extend(self.get_survey_specs())
 
         survey_record.survey["fields"][state]["data"] = survey_record.unprocessed_user_message
         survey_record.survey["fields"][state]["submission_time"] = survey_record.message_submission_time
@@ -34,6 +34,7 @@ class SurveyManager(abc.ABC):
 
     @abc.abstractmethod
     def get_survey_specs(self):
+        """this won't be used anymore since we are getting survey from Ushahidi"""
         return {}
 
     @abc.abstractmethod
