@@ -101,6 +101,20 @@ class UshahidiClient(HttpClient):
             raise IOError('Failed request: {}'.format(request.__dict__))
         return [Post.deserialize(json_blob) for json_blob in response.json().get('results')]
 
+    def get_post(self, key: int) -> Post:
+        """
+        :param post:
+        :return:
+        """
+        request = (self.get_request_builder()
+                   .suburl('posts')
+                   .key(key=key)
+                   ).build()
+        response = self.get(request=request)
+        if response.status_code != 200:
+            raise IOError('Failed request: {}'.format(request.__dict__))
+        return Post.deserialize(response.json())
+
     def save_post(self, post: Post):
         """
         :param post:
@@ -142,12 +156,15 @@ if __name__ == '__main__':
     # Get attributes (not being used, we will use it later)
     attributes = client.get_attributes(1)
     # Get posts
-    posts = client.get_posts()
+    post = client.get_post(15)
+    post.title = 'Volience - Cats'
+    post.content = 'Cats are being fed milk instead of fish'
+    post.source = 'SMS'
+    updated_post = client.update_post(post)
     # Create a new post and save it via API
-    post = Post(title='Violence incident', content="Halp me")
-    post.set_form(form=main_form)
-    saved_post = client.save_post(post)
-    # Update title of saved_post
-    saved_post.title = 'Violence incident [update]'
-    updated_post = client.update_post(saved_post)
-    print(updated_post)
+    # post = Post(title='Violence incident', content="Halp me", source='SMS', status='published')
+    # post.set_form(form=main_form)
+    # saved_post = client.save_post(post)
+    # # Update title of saved_post
+    # updated_post = client.update_post(saved_post)
+    # print(updated_post)
