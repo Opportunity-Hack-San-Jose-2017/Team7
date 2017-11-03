@@ -14,10 +14,11 @@ log = logging.getLogger(__name__)
 class SMSSurveyManager(SurveyManager):
 
     def __init__(self):
-        self.generic_survey_fields = yaml.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                                 "sms/generic.yaml")))
+        #self.generic_survey_fields = yaml.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+        #                                                         "sms/generic.yaml")))
         self.complete_msg = 'Report completed.'
         self.ushahidi_client = ushahidi_http.UshahidiClient()
+        self.init_generic_survey()
 
     def send_response_to_user(self, survey_record):
         try:
@@ -130,7 +131,7 @@ class SMSSurveyManager(SurveyManager):
         log.info(forms)
         for form in forms:
             log.info("form name = " + form.name)
-            if survey_record.unprocessed_user_message.lower() in form.name.lower():
+            if survey_record.unprocessed_user_message.rstrip('.').lower() in form.name.lower():
                 log.info("found form")
                 survey_record.form_name = form.name
                 self.form = form
@@ -182,6 +183,17 @@ class SMSSurveyManager(SurveyManager):
 
     def get_generic_survey_fields(self):
         return self.generic_survey_fields
+
+    def init_generic_survey(self):
+        self.generic_survey_fields = [{'text': 'first message'}]
+        forms = self.ushahidi_client.get_forms()
+
+        options = []
+        for form in forms:
+            options.append(form.name.split('Report')[0].strip())
+
+        self.generic_survey_fields.append({'text': 'What do you want to report on? Options: ' + '. '.join(options) + '.'})
+        log.info("updated ")
 
     def send_response(self, user_number, response):
         """

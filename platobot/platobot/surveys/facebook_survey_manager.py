@@ -124,7 +124,7 @@ class FacebookSurveyManager(SurveyManager):
         log.info(forms)
         for form in forms:
             log.info("form name = " + form.name)
-            if survey_record.unprocessed_user_message.lower() in form.name.lower():
+            if survey_record.unprocessed_user_message.rstrip('.').lower() in form.name.lower():
                 log.info("found form")
                 survey_record.form_name = form.name
                 self.form = form
