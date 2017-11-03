@@ -12,6 +12,7 @@ class FacebookSurveyManager(SurveyManager):
 
         self.generic_survey_fields = yaml.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                                  "facebook/kenya.yaml")))
+        print(self.generic_survey_fields)
         self.complete_msg = {"text": "Report completed!"}
         self.ushahidi_client = ushahidi_http.UshahidiClient()
         forms = self.ushahidi_client.get_forms()
@@ -31,6 +32,7 @@ class FacebookSurveyManager(SurveyManager):
         # key: 4f48b8c4-7615-405d-9113-1844371ba01e
         # later use keys to look up and store as values
 
+        self.generic_survey_fields = [{'text': 'first msg'}]
         for attribute in self.form_attributes:
             log.info(str(attribute))
             log.info(str(attribute.instructions))
@@ -38,12 +40,43 @@ class FacebookSurveyManager(SurveyManager):
             # title type is title always
             # description type is description always
             log.info(str(attribute.type_))
+            log.info(str(attribute.misc_json_data))
+            # options = ["Life threatening", "It can wait a few hours", "Not urgent"]
             if attribute.type_ == 'title':
                 self.title_instruction = attribute.instructions
+                self.generic_survey_fields.append({'text': attribute.instructions, "key": 'title'})
             elif attribute.type_ == 'description':
                 self.description_instruction = attribute.instructions
-            elif attribute.input == 'location': # only specific to location
-                self.location_instruction = attribute.instructions
+                self.generic_survey_fields.append({'text': attribute.instructions, "key": 'description'})
+            else:
+                # note: location has a specific input==location
+                item = {
+                    "text": attribute.instructions, 
+                    "key": attribute.key,
+                    "input": attribute.input,
+                    "type": attribute.type_,
+                }
+                if attribute.input == "location":
+                    quick_replies = [{
+                        "content_type": "location",
+                        "title": "location",
+                        "payload": "location"
+                    }]
+                    item['quick_replies'] = quick_replies
+
+                if attribute.misc_json_data.get('options') is not None and len(attribute.misc_json_data.get('options')) > 0:
+                    options = attribute.misc_json_data.get('options')
+                    quick_replies = []
+                    for op in options:
+                        quick_replies.append({
+                            "content_type": "text",
+                            "title": op,
+                            "payload": "payload"
+                        })
+                    item['quick_replies'] = quick_replies
+
+                self.generic_survey_fields.append(item)
+                print(self.generic_survey_fields)
 
 
     def send_response_to_user(self, survey_record):
@@ -71,20 +104,28 @@ class FacebookSurveyManager(SurveyManager):
         values = {}
         fields = survey_record.survey["fields"]
         for field in fields:
-            if field.get('text') == self.title_instruction:
+            if field.get('key') == 'title':
                 title = field.get('data')
-            elif field.get('text') == self.description_instruction:
+            elif field.get('key') == 'description':
                 description = field.get('data')
 
             # here should check for other values using the attribute key
-            elif field.get('text') == 'What is your location?':
+            elif field.get('input') == 'location':
+                # if it doesn't have lat, long, we're in trouble??
                 loc = field.get('data') # "latitude: 37.4213457, longitude: -121.8619215"
                 # ;)
-                lat = float(loc.split(',')[0].split(':')[1])
-                lon = float(loc.split(',')[1].split(':')[1])
-                values['448ed837-eecb-4306-967e-b394540ea863'] = [{"lat": lat, "lon": lon}]
-            elif field.get('text') == 'How urgent is the situation?':
-                values['4f48b8c4-7615-405d-9113-1844371ba01e'] = [field.get('data')]
+                try:
+                    lat = float(loc.split(',')[0].split(':')[1])
+                    lon = float(loc.split(',')[1].split(':')[1])
+                finally:
+                    lat = 0
+                    lon = 0
+                # values['448ed837-eecb-4306-967e-b394540ea863'] = [{"lat": lat, "lon": lon}]
+                if field.get('key') is not None:
+                    values[field.get('key')] = [{"lat": lat, "lon": lon}]
+            else:
+                if field.get('key') is not None:
+                    values[field.get('key')] = [field.get('data')]
 
         # notes, the "key" need to be used in values, should grab keys dynamically ^^^
         # Location
