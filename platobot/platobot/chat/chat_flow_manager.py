@@ -19,7 +19,23 @@ class Action(object):
 
 # TODO: grab this from org info n stuff
 bot_intro = {
-    "text": "Hi, I'm Plato bot. Here are things I can do.",
+    "text": "Hi, I'm Plato bot. I work for Ushahidi. I can help you send a report or tell you about Ushahidi.",
+    "quick_replies": [
+        {
+            "content_type": "text",
+            "title": "Send a report",
+            "payload": "ask_to_send_report"
+        },
+        {
+            "content_type": "text",
+            "title": "About Ushahidi",
+            "payload": "ushahidi_intro"
+        }
+    ]
+}
+
+bot_intro_skills = {
+    "text": "I can help you send a report or tell you about Ushahidi.",
     "quick_replies": [{
         "content_type": "text",
         "title": "Send a report",
@@ -58,22 +74,23 @@ def reply(messaging_event, request_time):
                     message_text = "latitude: {}, longitude: {}".format(coordinates.get('lat', ''),
                                                                         coordinates.get('long', ''))
 
-    #action = get_user_intent_with_suggested_reply(messaging_event)
-    #log.info("Bot action %s", action.action)
-    return start_survey_flow(sender_id, recipient_id, message_text, request_time)
-
-    # if action is not None:
-    #     if action.action == "smalltalk.confirmation.cancel":
-    #         return cancel_survey_flow(sender_id, recipient_id, message_text, request_time)
-    #     elif is_in_middle_of_survey(messaging_event):
-    #         return start_survey_flow(sender_id, recipient_id, message_text, request_time)
-    #     elif action.action == "reports.want_to_send":
-    #         return start_survey_flow(sender_id, recipient_id, message_text, request_time)
-    #     else:
-    #         if not action.suggested_reply.get("text"):
-    #             action.suggested_reply = when_bot_is_confused
-    #         return send_response(sender_id, action.suggested_reply)
-    # return send_response(sender_id, bot_fall_back_action().suggested_reply)
+    action = get_user_intent_with_suggested_reply(messaging_event)
+    log.info("Bot action %s", action.action)
+    if action is not None:
+        if action.action == "smalltalk.confirmation.cancel":
+            return cancel_survey_flow(sender_id, recipient_id, message_text, request_time)
+        elif is_in_middle_of_survey(messaging_event):
+            return start_survey_flow(sender_id, recipient_id, message_text, request_time)
+        elif action.action == "reports.want_to_send":
+            return start_survey_flow(sender_id, recipient_id, message_text, request_time)
+        elif action.action == "what_can_you_do" or action.action == "smalltalk.agent.answer_my_question":
+            action.suggested_reply = bot_intro_skills
+            return send_response(sender_id, action.suggested_reply)
+        else:
+            if not action.suggested_reply.get("text"):
+                action.suggested_reply = when_bot_is_confused
+            return send_response(sender_id, action.suggested_reply)
+    return send_response(sender_id, bot_fall_back_action().suggested_reply)
 
 def get_user_intent_with_suggested_reply(messaging_event):
     sender_id = messaging_event["sender"]["id"]

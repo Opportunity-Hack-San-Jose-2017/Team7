@@ -11,6 +11,7 @@ log = logging.getLogger(__name__)
 
 class FacebookSurveyManager(SurveyManager):
     def __init__(self):
+
         self.generic_survey_fields = yaml.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                                  "facebook/kenya.yaml")))
         self.complete_msg = {"text": "Report completed!"}
