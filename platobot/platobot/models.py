@@ -25,6 +25,7 @@ class Survey(platobot_db.BASE_MODEL):
     state = db.Column(db.Integer)
     # post id from Ushahidi
     post_id = db.Column(db.Integer)
+    form_name = db.Column(db.String(100))
     creation_time = db.Column(db.DateTime)
     unprocessed_user_message = db.Column(db.String(140))
     message_submission_time = db.Column(db.DateTime)

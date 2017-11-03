@@ -1,15 +1,3 @@
-- field_name: 'user_init'
-  text: ''
-  type: 'str'
-- field_name: 'urgency'
-  text: 'Are you in immediate danger?'
-  type: 'str'
-- field_name: 'location'
-  text: 'What is your location?'
-  type: 'str'
-- field_name: 'type of event'
-  text: 'What type of event are you reporting? Reply 1 for earthquake 2 for hurricane'
-  type: 'options'
-  options:
-    - 'earthquake'
-    - 'hurricane'
+- text: "user init"
+
+- text: "What do you want to report on? Options: Kenya Election. Kenya Flood."

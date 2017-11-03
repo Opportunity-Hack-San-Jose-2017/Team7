@@ -1,5 +1,7 @@
 import abc
 from sqlalchemy.orm.attributes import flag_modified
+import logging
+log = logging.getLogger(__name__)
 
 
 class SurveyManager(abc.ABC):
@@ -15,8 +17,11 @@ class SurveyManager(abc.ABC):
 
         if state == 0:
             self.init_survey(survey_record)
-        #elif state == len(self.get_generic_survey_fields()) - 1:
-        #    survey_record.survey["fields"].extend(self.get_survey_specs())
+
+        log.info(len(self.get_generic_survey_fields()) - 1)
+        log.info(state)
+        if state == len(self.get_generic_survey_fields()) - 1:
+            survey_record.survey["fields"].extend(self.get_survey_specs(survey_record))
 
         survey_record.survey["fields"][state]["data"] = survey_record.unprocessed_user_message
         survey_record.survey["fields"][state]["submission_time"] = survey_record.message_submission_time
@@ -33,7 +38,12 @@ class SurveyManager(abc.ABC):
         return
 
     @abc.abstractmethod
-    def get_survey_specs(self):
+    def init_generic_survey(self):
+        """this won't be used anymore since we are getting survey from Ushahidi"""
+        return
+
+    @abc.abstractmethod
+    def get_survey_specs(self, survey_record):
         """this won't be used anymore since we are getting survey from Ushahidi"""
         return {}
 

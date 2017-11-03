@@ -1,31 +1,10 @@
 - text: "user init"
 
-- text: "Are you in immediate danger?"
+- text: "What do you want to report on?"
   quick_replies:
-    - content_type: "text"
-      title: "Yes"
-      payload: "reply1"
-    - content_type: "text"
-      title: "No"
-      payload: "reply2"
-
-- text: "What is your location?"
-  quick_replies:
-    - content_type: "location"
-      title: "location"
-      payload: "reply3"
-
-- text: "Select a category"
-  quick_replies:
-    - content_type: "text"
-      title: "Violence"
-      payload: "reply1"
-    - content_type: "text"
-      title: "Harassment"
-      payload: "reply2"
-    - content_type: "text"
-      title: "Danger"
-      payload: "reply3"
-    - content_type: "text"
-      title: "Other"
-      payload: "reply4"
+  - content_type: "text"
+    title: "Kenya Election"
+    payload: "reply1"
+  - content_type: "text"
+    title: "Kenya Flood"
+    payload: "reply2"
