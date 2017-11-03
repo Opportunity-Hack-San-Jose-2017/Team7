@@ -76,7 +76,7 @@ def create_app(config):
 
         # resp = MessagingResponse()
         # resp.message("{}, thanks for the message: {} !".format(from_number, message_received))
-        return None
+        return "ok", 200
 
     logging.basicConfig(stream=sys.stdout,
         format='%(asctime)s|%(levelname)s|%(filename)s:%(lineno)s|%(message)s',

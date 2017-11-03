@@ -90,7 +90,7 @@ class FacebookSurveyManager(SurveyManager):
 
     def _survey_complete_hook(self, survey_record):
         """
-        This hook is called after survery is completed
+        This hook is called after survey is completed
         :return:
         """
         print('survey_record')
@@ -115,12 +115,11 @@ class FacebookSurveyManager(SurveyManager):
                 loc = field.get('data') # "latitude: 37.4213457, longitude: -121.8619215"
                 # ;)
                 if loc:
-                    try:
-                        lat = float(loc.split(',')[0].split(':')[1])
-                        lon = float(loc.split(',')[1].split(':')[1])
-                    finally:
-                        lat = 0
-                        lon = 0
+                    coords = loc.split(',')
+                    lat, lon = float(coords[0].split(':')[1].strip()), float(coords[1].split(':')[1].strip())
+                    lat, lon = float("{0:.3f}".format(lat)), float("{0:.3f}".format(lon))
+
+                    print("lat: {}, lon: {}".format(lat, lon))
                     # values['448ed837-eecb-4306-967e-b394540ea863'] = [{"lat": lat, "lon": lon}]
                     if field.get('key') is not None:
                         values[field.get('key')] = [{"lat": lat, "lon": lon}]
