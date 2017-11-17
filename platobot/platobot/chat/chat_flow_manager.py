@@ -109,11 +109,13 @@ def get_user_intent_with_suggested_reply(messaging_event):
 def get_user_intent_from_fb_wit_ai(message_text, message_nlp):
     if message_nlp is not None:
         entities = message_nlp.get("entities")
-        if hasGreetings(entities):
+        if entities is None:
+            return None
+        if has_greetings(entities):
             return Action("greetings", bot_intro)
     return None
 
-def hasGreetings(entities):
+def has_greetings(entities):
     greetings = entities.get("greetings")
     if greetings is not None and greetings[0] is not None:
         if greetings[0]["confidence"] > 0.9:
@@ -153,11 +155,11 @@ def get_reply_message(messaging_event):
 def get_user_intent_from_fb_wit_ai(message_text, message_nlp):
     if message_nlp is not None:
         entities = message_nlp.get("entities")
-        if hasGreetings(entities):
+        if has_greetings(entities):
             return Action("greetings", bot_intro)
     return None
 
-def hasGreetings(entities):
+def has_greetings(entities):
     greetings = entities.get("greetings")
     if greetings is not None and greetings[0] is not None:
         if greetings[0]["confidence"] > 0.9:
