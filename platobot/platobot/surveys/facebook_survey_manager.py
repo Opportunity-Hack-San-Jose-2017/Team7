@@ -2,7 +2,7 @@ import yaml
 import os
 import logging
 from platobot.surveys.survey_manager import SurveyManager
-from platobot.utils.facebook_api import send_response
+from platobot.services.facebook_messenger import FacebookMessenger
 from platobot.ushahidi import ushahidi_http, ds
 
 log = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ class FacebookSurveyManager(SurveyManager):
             survey_record.state = -1
             response = self.complete_msg
         finally:
-            send_response(survey_record.user, response)
+            FacebookMessenger.send_response(survey_record.user, response)
 
     def _survey_complete_hook(self, survey_record):
         """

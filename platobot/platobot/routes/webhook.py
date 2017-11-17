@@ -12,9 +12,10 @@ from twilio.twiml.messaging_response import MessagingResponse
 
 # sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..'))
 from platobot.config import FacebookConfig, UshahidiConfig
-from platobot.chat import chat_flow_manager
+from platobot.chat.chat_flow_manager import ChatFlowManager
 from platobot.constants import Channels
 
+chat_flow_manager = ChatFlowManager()
 webhook = Blueprint('webhook', __name__)
 
 logging.basicConfig(stream=sys.stdout,
@@ -32,7 +33,7 @@ def facebook_verify():
             return "Verification token mismatch", 403
         return request.args["hub.challenge"], 200
 
-    return "Hello world", 403 
+    return "Unable to verify", 403 
 
 @webhook.route('/webhook', methods=['POST'])
 def facebook_webhook():
