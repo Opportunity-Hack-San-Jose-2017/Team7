@@ -4,7 +4,7 @@ Main entry
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..'))
-from platobot.api.app import create_app
+from platobot.factories.app import create_app
 from platobot.config import DevConfig, ProdConfig
 
 
