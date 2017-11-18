@@ -43,6 +43,7 @@ UPDATE:
 
 ## Test
   * `./run_test.sh`
+  * run one test: `nose2 platobot.test.test_webhook.TestWebhook`
 
 ## mysql docker setup
     ```

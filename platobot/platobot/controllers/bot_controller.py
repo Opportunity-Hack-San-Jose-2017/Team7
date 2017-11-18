@@ -51,7 +51,7 @@ when_bot_is_confused = {
     }]
 }
 
-class ChatFlowManager:
+class BotController:
     def __init__(self):
         self.facebook_messenger = FacebookMessenger()
         self.apiai = APIAI()
@@ -93,7 +93,7 @@ class ChatFlowManager:
                 if not action.suggested_reply.get("text"):
                     action.suggested_reply = when_bot_is_confused
                 return self.facebook_messenger.send_response(sender_id, action.suggested_reply)
-        return self.facebook_messenger.send_response(sender_id, bot_fall_back_action().suggested_reply)
+        return self.facebook_messenger.send_response(sender_id, self.bot_fall_back_action().suggested_reply)
 
     def get_user_intent_with_suggested_reply(self, messaging_event):
         sender_id = messaging_event["sender"]["id"]
@@ -127,51 +127,7 @@ class ChatFlowManager:
     def get_user_intent_from_apiai(self, session_id, message_text):
         result = self.apiai.get_user_intent(session_id, message_text)
         if result is None:
-            return bot_fall_back_action()
-
-        action = result.get("action")
-        speech = result['fulfillment']['speech']
-
-        return Action(action, {"text": speech})
-
-    def bot_fall_back_action(self):
-        return Action(None, when_bot_is_confused)
-
-    def get_reply_message(self, messaging_event):
-        sender_id = messaging_event["sender"]["id"]
-        message = messaging_event["message"]
-        message_text = message.get("text", '')
-        message_nlp = message.get("nlp")
-        log.info("Get user intent from facebook wit ai")
-        intent = get_user_intent_from_fb_wit_ai(message_text, message_nlp);
-        if intent is None:
-            log.info("Nothing to use from wit.ai, consulting apiai...")
-            intent = get_user_intent_from_apiai(sender_id, message_text)
-        log.info(intent)
-        return intent
-
-    def get_user_intent_from_fb_wit_ai(self, message_text, message_nlp):
-        if message_nlp is not None:
-            entities = message_nlp.get("entities")
-            if self.has_greetings(entities):
-                return Action("greetings", bot_intro)
-        return None
-
-    def has_greetings(self, entities):
-        greetings = entities.get("greetings")
-        if greetings is not None and greetings[0] is not None:
-            if greetings[0]["confidence"] > 0.9:
-                return True
-        return False
-
-    def get_user_intent_from_apiai(self, session_id, message_text):
-        request = ai.text_request()
-        request.session_id = session_id
-        request.query = message_text
-        apiai_response = json.loads(request.getresponse().read())
-        result = apiai_response.get("result")
-        if result is None:
-            return bot_fall_back_action()
+            return self.bot_fall_back_action()
 
         action = result.get("action")
         speech = result['fulfillment']['speech']

@@ -1,1 +1,2 @@
-nosetests
+source activate
+nose2

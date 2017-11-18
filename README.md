@@ -1,1 +1,3 @@
-# Team7
+# Plato
+
+Main entry: platbot

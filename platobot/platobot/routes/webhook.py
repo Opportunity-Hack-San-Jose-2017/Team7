@@ -12,10 +12,10 @@ from twilio.twiml.messaging_response import MessagingResponse
 
 # sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..'))
 from platobot.config import FacebookConfig, UshahidiConfig
-from platobot.chat.chat_flow_manager import ChatFlowManager
+from platobot.controllers.bot_controller import BotController
 from platobot.constants import Channels
 
-chat_flow_manager = ChatFlowManager()
+bot_controller = BotController()
 webhook = Blueprint('webhook', __name__)
 
 logging.basicConfig(stream=sys.stdout,
@@ -50,7 +50,7 @@ def facebook_webhook():
             for messaging_event in entry["messaging"]:
 
                 if messaging_event.get("message"):  # someone sent us a message
-                    chat_flow_manager.reply(messaging_event, request_time)
+                    bot_controller.reply(messaging_event, request_time)
 
                 # delivery confirmation
                 if messaging_event.get("delivery"):
