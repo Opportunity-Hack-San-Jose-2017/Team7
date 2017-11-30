@@ -1,4 +1,3 @@
-import httpretty
 import requests
 import json
 from unittest.mock import patch, ANY
@@ -76,13 +75,9 @@ class TestWebhook(BaseTestCase):
         self.assertResponseText(res, b'CHALLENGE_ACCEPTED')
 
     @patch('platobot.controllers.bot_controller.BotController.reply')
-    def test_api_post_to_webhook(self, bot_reply_mock):
+    def test_facebook_post_message_event_to_webhook(self, bot_reply_mock):
         """Test API can get webhook (GET request)."""
         bot_reply_mock.return_value = None
-        # httpretty.enable()
-        # httpretty.register_uri(httpretty.GET, FacebookConfig.FACEBOOK_MESSAGEING_API,
-        #                        body="This is the mocked body",
-        #                        status=201)
         facebook_message = generate_facebook_message()
         res = self.client.post(
             '/webhook',
@@ -91,5 +86,4 @@ class TestWebhook(BaseTestCase):
         )
         self.assertEqual(res.status_code, 200)
         bot_reply_mock.assert_called_once_with(facebook_message["entry"][0]["messaging"][0], ANY)
-        # httpretty.disable()
 

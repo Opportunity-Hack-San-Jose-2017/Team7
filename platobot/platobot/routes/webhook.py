@@ -72,7 +72,7 @@ def twilio_inbound_webhook():
     from_number = request.values.get('From', '')
     message_received = request.values.get('Body', '')
 
-    chat_flow_manager.save_user_message(from_number, Channels.SMS, message_received, datetime.datetime.utcnow())
+    bot_controller.save_user_message(from_number, Channels.SMS, message_received, datetime.datetime.utcnow())
 
     # resp = MessagingResponse()
     # resp.message("{}, thanks for the message: {} !".format(from_number, message_received))

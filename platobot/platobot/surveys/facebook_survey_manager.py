@@ -17,6 +17,7 @@ class FacebookSurveyManager(SurveyManager):
         self.form = None
         self.form_attributes = None
         self.ushahidi_client = ushahidi_http.UshahidiClient()
+        self.facebook_messenger = FacebookMessenger()
         self.init_generic_survey()
 
     def send_response_to_user(self, survey_record):
@@ -28,7 +29,7 @@ class FacebookSurveyManager(SurveyManager):
             survey_record.state = -1
             response = self.complete_msg
         finally:
-            FacebookMessenger.send_response(survey_record.user, response)
+            self.facebook_messenger.send_response(survey_record.user, response)
 
     def _survey_complete_hook(self, survey_record):
         """
@@ -109,9 +110,6 @@ class FacebookSurveyManager(SurveyManager):
                 log.info('Updated post on Ushahidi')
 
     def get_survey_specs(self, survey_record):
-        """this won't be used anymore since we are getting survey from Ushahidi"""
-
-
         # build the form here and remember to store the keys for attributes
         # example:
         # Location
@@ -129,6 +127,7 @@ class FacebookSurveyManager(SurveyManager):
                 survey_record.form_name = form.name
                 self.form = form
                 break
+
         self.form_attributes = self.ushahidi_client.get_attributes(self.form.id)
 
         self.survey_fields = []

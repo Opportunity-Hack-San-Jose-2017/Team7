@@ -7,7 +7,6 @@ from platobot import models
 from platobot.services.facebook_messenger import FacebookMessenger
 from platobot.services.api_ai import APIAI
 
-db_interface = models.platobot_db
 
 log = logging.getLogger(__name__)
 
@@ -55,6 +54,7 @@ class BotController:
     def __init__(self):
         self.facebook_messenger = FacebookMessenger()
         self.apiai = APIAI()
+        self.db_interface = models.platobot_db
 
     def reply(self, messaging_event, request_time):
         # the facebook ID of the person sending you the message
@@ -139,7 +139,7 @@ class BotController:
 
     def is_in_middle_of_survey(self, messaging_event):
         sender_id = messaging_event["sender"]["id"]
-        session = db_interface.new_session()
+        session = self.db_interface.new_session()
         record = session.query(models.Survey).filter(
             models.Survey.user == sender_id,
             models.Survey.state != -1
@@ -157,7 +157,7 @@ class BotController:
         self.save_user_message(sender_id, Channels.FACEBOOK, message_text, request_time)
 
     def save_user_message(self, user, channel, user_message, user_message_time):
-        session = db_interface.new_session()
+        session = self.db_interface.new_session()
         record = session.query(models.Survey).filter(models.Survey.user == user,
                                                         models.Survey.channel == channel).order_by(
             sqlalchemy.desc(models.Survey.message_submission_time)).first()

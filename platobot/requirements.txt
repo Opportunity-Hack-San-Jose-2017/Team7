@@ -24,5 +24,4 @@ twilio==6.8.2
 pygeocoder==1.2.5
 
 nose2==0.7.2
-HTTPretty==0.8.14
 

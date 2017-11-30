@@ -6,9 +6,8 @@ from platobot.config import TestConfig
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
         """Define test variables and initialize app."""
-        app = create_app(TestConfig)
-        app.app_context().push()
-        self.client = app.test_client()
+        self.app = create_app(TestConfig)
+        self.client = self.app.test_client()
 
     def tearDown(self):
         """teardown all initialized variables."""

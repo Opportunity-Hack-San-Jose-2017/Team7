@@ -129,6 +129,7 @@ class SMSSurveyManager(SurveyManager):
         forms = self.ushahidi_client.get_forms()
         log.info("survey_record.unprocessed_user_message = " + survey_record.unprocessed_user_message)
         log.info(forms)
+        self.form = None
         for form in forms:
             log.info("form name = " + form.name)
             if survey_record.unprocessed_user_message.rstrip('.').lower() in form.name.lower():
@@ -136,6 +137,11 @@ class SMSSurveyManager(SurveyManager):
                 survey_record.form_name = form.name
                 self.form = form
                 break
+
+        # TODO: handle when form is not found
+        if self.form is None:
+            return []
+
         self.form_attributes = self.ushahidi_client.get_attributes(self.form.id)
 
         self.survey_fields = []
