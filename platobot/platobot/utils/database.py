@@ -18,7 +18,6 @@ from sqlalchemy.ext import mutable
 
 log = logging.getLogger(__name__)
 
-
 def add_engine_pidguard(engine):
     """Add multiprocessing guards.
 

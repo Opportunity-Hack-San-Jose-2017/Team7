@@ -7,6 +7,7 @@ from platobot.utils import database
 
 
 logging.getLogger('sqlalchemy.engine').setLevel(config.SQLALCHEMY_LOG_LEVEL)
+print('setting database config');
 platobot_db = database.DBInterface(db_config=config.DATABASE_CONFIG())
 
 

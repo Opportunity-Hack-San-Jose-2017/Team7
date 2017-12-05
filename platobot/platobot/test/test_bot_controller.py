@@ -1,8 +1,11 @@
-import unittest
 import os
 import json
+import datetime
+from unittest.mock import patch, ANY
 from platobot.controllers.bot_controller import BotController
 from platobot.test.test_main import BaseTestCase
+from platobot.services import api_ai
+from platobot.services import facebook_messenger
 
 def generate_greeting_intent():
     return {
@@ -39,18 +42,29 @@ def generate_greeting_intent():
     }
 
 class BotControllerTestCases(BaseTestCase):
-    # def setUp(self):
-    #     self.greetings = generate_greeting_intent()
+    def setUp(self):
+        BaseTestCase.setUp(self)
+        self.greetings = generate_greeting_intent()
+        self.bot_controller = BotController()
 
-    def test_reply_to_greetings(self):
-        print(self.app)
-        # response = get_reply_message(self.greetings)
-        # self.assertDictEqual(response, {
-        #     "text": "Hi, I'm Plato bot. Here are things I can do.",
-        #     "quick_replies": [{
-        #         "content_type": "text",
-        #         "title": "Send a report",
-        #         "payload": "ask_to_send_report"
-        #     }]
-        # })
-        pass
+    # @patch('platobot.services.api_ai.APIAI.get_user_intent')
+    @patch('platobot.services.facebook_messenger.FacebookMessenger.send_response')
+    def test_reply_to_greetings(self, send_response):
+        """ Introduces self when see greetings intent """
+        self.bot_controller.reply(self.greetings, datetime.datetime.utcnow())
+        send_response.assert_called_once_with(self.greetings["sender"]["id"],
+        {
+            "text": "Hi, I'm Plato bot. I work for Ushahidi. I can help you send a report or tell you about Ushahidi.",
+            "quick_replies": [
+                {
+                    "content_type": "text",
+                    "title": "Send a report",
+                    "payload": "ask_to_send_report"
+                },
+                {
+                    "content_type": "text",
+                    "title": "About Ushahidi",
+                    "payload": "ushahidi_intro"
+                }
+            ]
+        })
