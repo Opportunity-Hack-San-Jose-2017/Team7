@@ -21,7 +21,7 @@ UPDATE:
   * **Project setup**
       * `./setup.sh` to setup the python virtual environment - put all setup steps here
       * Make sure your virtual environment is activated while you are developing on the `platobot` project.
-      * python -m platobot.bin.bootstrap_db
+      * `python -m platobot.bin.bootstrap_db`
 
   * **Pycharm**
       * Setup project interpreter in Pycharm->Preferences->Project Interpreter
@@ -35,18 +35,20 @@ UPDATE:
 
 ## Run Guide:
 
-  * To bootstrap database, run 'python platobot/bin/bootstrap_db.py'. Enter 'I agree' to confirm.
+  * To bootstrap database, run `python platobot/bin/bootstrap_db.py`. Enter 'I agree' to confirm.
 
-  * To run flask server, run './run_server.sh'. To stop server and kill daemon processes, run './stop_server.sh'.
+  * To run flask server, run `./run_server.sh`. To stop server and kill daemon processes, run `./stop_server.sh`.
 
-  * To run gunicorn server(serve multiple http requests at same time), run './server.sh start'. To stop it and kill daemon processes, run './server.sh stop'.
+  * To run gunicorn server(serve multiple http requests at same time), run `./server.sh start`. To stop it and kill daemon processes, run `./server.sh stop`.
 
 ## Test
   * `./run_test.sh`
   * run one test: `nose2 platobot.test.test_webhook.TestWebhook`
 
 ## mysql docker setup
-    ```
-    docker pull mysql/mysql-server
-    docker run --name mysqlserver -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_ROOT_HOST=172.17.0.1 -d mysql/mysql-server
-    ```
+```
+docker pull mysql/mysql-server
+docker run --name mysqlserver -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_ROOT_HOST=172.17.0.1 -d mysql/mysql-server
+```
+
+After the set up, `docker start mysqlserver` will start the mysql server, don't need to execute docker run again.
